@@ -1,0 +1,355 @@
+Perfect — I will now update the full project plan to use Supabase + React, instead of Node.js + Express + MongoDB.
+
+This version is fully optimized for a Hackathon, faster to build, and uses Supabase as:
+
+✔ Authentication
+✔ Database (PostgreSQL)
+✔ Storage (Resume upload PDFs)
+✔ Edge Functions (AI, scraping, parsing)
+✔ Row Level Security (RLS)
+✔ API endpoints replacement
+
+🚀 UPDATED PROJECT PLAN (Supabase + React Version)
+
+Your new stack:
+
+Frontend: React + Vite + Tailwind + React Router + Axios/Fetch
+
+Backend: Supabase (Auth + DB + Storage + Edge Functions)
+
+AI: Supabase Edge Functions (Deno runtime) + OpenAI API
+
+Scraping: Edge Functions using Cheerio + Fetch
+
+Resume Parsing: Edge Functions (extract text + AI processing)
+
+✅ SUPABASE DATABASE SCHEMA (PostgreSQL)
+
+You must create these tables inside Supabase.
+
+1. users (auto managed by Supabase Auth)
+
+Supabase automatically manages:
+
+id (UUID)
+
+email
+
+created_at
+
+We extend it with a public.users table for profile data.
+
+2. profiles table
+create table profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  name text,
+  avatar_url text,
+
+  resume_url text,
+  resume_raw_text text,
+
+  skills text[],
+  experience jsonb,
+  education jsonb,
+  projects jsonb,
+
+  created_at timestamptz default now()
+);
+
+3. job_matches table
+create table job_matches (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references profiles(id) on delete cascade,
+
+  title text,
+  company text,
+  link text,
+  score int,
+  reasons text,
+  requirements text[],
+  date_found timestamptz default now()
+);
+
+4. interview_history table
+create table interview_history (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references profiles(id) on delete cascade,
+
+  company text,
+  role text,
+  tech_stack text[],
+  date timestamptz default now(),
+
+  questions jsonb
+);
+
+5. job_cache (optional but useful)
+create table job_cache (
+  id uuid primary key default gen_random_uuid(),
+  query text,
+  results jsonb,
+  timestamp timestamptz default now()
+);
+
+🔐 RLS Policies
+
+Enable RLS for:
+
+profiles
+
+job_matches
+
+interview_history
+
+Then add policies:
+
+-- User can select their own profile
+create policy "Users can select own data" 
+on profiles for select 
+using (auth.uid() = id);
+
+-- User can update own data
+create policy "Users can update own data"
+on profiles for update
+using (auth.uid() = id);
+
+
+Do similar for:
+
+job_matches
+
+interview_history
+
+⚡ SUPABASE EDGE FUNCTIONS YOU MUST CREATE
+
+You will use Edge Functions as your backend API.
+
+1. parse_resume function
+
+Purpose:
+
+Accept PDF upload URL
+
+Extract text
+
+AI analyze resume
+
+Store parsed data in DB
+
+Flow:
+
+upload → storage url → Edge Function → pdf → AI extraction → save in profiles
+
+
+Function tasks:
+
+Fetch the PDF from Supabase storage
+
+Extract text (PDF.js or a Deno library)
+
+Send text to OpenAI for structured JSON
+
+Upsert into profiles table
+
+2. discover_jobs function
+
+Purpose:
+
+Read user profile (skills)
+
+Scrape jobs using scraping portals
+
+Ask AI to score jobs
+
+Save in job_matches
+
+Flow:
+
+skills → scrape → AI scoring → store in DB → return results
+
+3. interview_generator function
+
+Purpose:
+
+Input: company, role, tech stack
+
+Scrape company data
+
+Generate deep technical + behavioral questions
+
+Store in interview_history
+
+Flow:
+
+input → scrape → AI generate → save → return
+
+🎨 FRONTEND (REACT) PLAN
+
+Pages remain mostly the same but backend calls change → now calling Supabase + Edge Functions.
+
+🌐 FRONTEND PAGES
+1. Auth Pages
+
+Using supabase.auth.signUp() and signInWithPassword().
+
+/login
+/register
+
+Store session via Supabase Auth Helper.
+
+2. Upload Resume Page
+/upload-resume
+
+Upload PDF to Supabase Storage
+
+Call parse_resume function
+
+Show parsed results
+
+3. Job Discovery Page
+/jobs
+
+Call Supabase Edge Function:
+
+POST /discover_jobs
+
+
+Display:
+
+title
+
+company
+
+match score
+
+reason
+
+4. Interview Prep Page
+/interview
+
+Form Inputs:
+
+company
+
+role
+
+tech stack
+
+Call:
+
+POST /interview_generator
+
+
+Display:
+
+questions
+
+answers
+
+explanations
+
+5. Dashboard Page
+/dashboard
+
+Fetch from DB:
+
+skills
+
+job_matches
+
+interview_history
+
+insights (computed client-side OR via function)
+
+Use Recharts for graphs:
+
+Pie chart → skill distribution
+
+Bar chart → job scores
+
+Timeline → interview history
+
+🗂️ FRONTEND FOLDER STRUCTURE (React)
+src/
+ ├─ components/
+ ├─ pages/
+ │   ├─ Auth/
+ │   ├─ UploadResume.jsx
+ │   ├─ JobDiscovery.jsx
+ │   ├─ InterviewPrep.jsx
+ │   ├─ Dashboard.jsx
+ ├─ supabase/
+ │   ├─ client.js  (supabase config)
+ ├─ api/
+ │   ├─ resume.js
+ │   ├─ jobs.js
+ │   ├─ interview.js
+ ├─ App.jsx
+ ├─ main.jsx
+
+🌩️ SUPABASE EDGE FUNCTIONS STRUCTURE
+supabase/
+ ├─ functions/
+ │   ├─ parse_resume/
+ │   │    ├─ index.ts
+ │   ├─ discover_jobs/
+ │   │    ├─ index.ts
+ │   ├─ interview_generator/
+ │   │    ├─ index.ts
+
+🗓️ HACKATHON IMPLEMENTATION TIMELINE
+Day 1 – Supabase Setup
+
+Create tables
+
+Setup auth
+
+Connect React to Supabase
+
+Build Login + Register
+
+Day 2 – Resume Upload + Parsing
+
+Storage + file upload
+
+parse_resume function
+
+Show parsed skills
+
+Day 3 – Job Discovery
+
+discover_jobs function
+
+Build frontend job list
+
+Store job matches
+
+Day 4 – Interview Preparation
+
+interview_generator function
+
+Display question bank
+
+Save history
+
+Day 5 – Dashboard + Final Cleanup
+
+Charts
+
+Insights
+
+Polish UI
+
+Remove bugs
+
+Connect all flows
+
+✨ NEXT STEP (Tell me one word):
+
+“Generate Supabase schema SQL”
+or
+“Generate Edge Functions code”
+or
+“Generate React pages”
+or
+“Give me the full system folder structure with code”

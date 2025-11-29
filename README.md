@@ -31,6 +31,9 @@ A modern authentication system built with Next.js 14, Supabase, and Google OAuth
 
 ## Quick Start
 
+## Tools
+-  **CHATGPT** - **GEMINI** - **Claude** - **Supabase** - **NextJS** - **VERCEL** - **Antigravity**
+
 ### 1. Install Dependencies
 
 ```bash
