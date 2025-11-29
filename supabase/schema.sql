@@ -167,3 +167,71 @@ END $$;
 -- Allow authenticated users to access the profiles table
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON public.profiles TO anon, authenticated;
+-- =====================================================
+-- Resume Data Schema
+-- =====================================================
+
+-- Skills Table
+CREATE TABLE IF NOT EXISTS public.skills (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    skill_name TEXT NOT NULL,
+    proficiency TEXT, -- e.g., Beginner, Intermediate, Expert
+    category TEXT, -- e.g., Programming Language, Framework, Tool
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Experience Table
+CREATE TABLE IF NOT EXISTS public.experience (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    company_name TEXT NOT NULL,
+    role TEXT NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    is_current BOOLEAN DEFAULT FALSE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Education Table
+CREATE TABLE IF NOT EXISTS public.education (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    institution_name TEXT NOT NULL,
+    degree TEXT,
+    field_of_study TEXT,
+    start_date DATE,
+    end_date DATE,
+    is_current BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Projects Table
+CREATE TABLE IF NOT EXISTS public.projects (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    project_name TEXT NOT NULL,
+    description TEXT,
+    technologies TEXT[], -- Array of technologies used
+    project_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- RLS Policies (Enable RLS and allow users to manage their own data)
+
+-- Skills
+ALTER TABLE public.skills ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage own skills" ON public.skills USING (auth.uid() = user_id);
+
+-- Experience
+ALTER TABLE public.experience ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage own experience" ON public.experience USING (auth.uid() = user_id);
+
+-- Education
+ALTER TABLE public.education ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage own education" ON public.education USING (auth.uid() = user_id);
+
+-- Projects
+ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage own projects" ON public.projects USING (auth.uid() = user_id);
