@@ -213,3 +213,158 @@ Simply re-creating a basic job board or generic question bank will score low
 Bonus points for creative, sophisticated solutions to clearly challenging aspects (e.g., deep company/role-specific research, multi-step AI reasoning, high-quality resume parsing)
 
 Well done on building something this ambitious! Good luck in the hackathon! 🚀
+
+
+
+✅ Supabase SQL Schema (Final Version)
+1. users
+
+Stores basic user accounts (auth handled by Supabase Auth)
+
+create table users (
+    id uuid primary key,
+    full_name text,
+    email text unique,
+    created_at timestamptz default now()
+);
+
+2. resumes
+
+Stores uploaded resumes + extracted structured fields
+
+create table resumes (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid references users(id) on delete cascade,
+    file_url text not null,
+    raw_text text, -- extracted PDF text
+    summary text,  -- AI extracted summary / profile statement
+
+    -- extracted structured data
+    skills jsonb,        -- e.g. ["React", "Node.js", "SQL"]
+    experience jsonb,    -- list of jobs, companies, durations
+    education jsonb,     -- degrees, universities
+    projects jsonb,      -- project names, tech stack
+
+    ai_skill_levels jsonb,  -- {"React":"Intermediate", "Python":"Expert"}
+
+    created_at timestamptz default now()
+);
+
+3. user_profiles
+
+Built from resume insights + editable by user.
+
+create table user_profiles (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid references users(id) on delete cascade,
+    headline text,
+    strengths jsonb,
+    weaknesses jsonb,
+    preferred_roles text[],
+    tech_stack jsonb,
+    updated_at timestamptz default now()
+);
+
+🟦 JOB DISCOVERY & MATCHING
+4. scraped_jobs
+
+Where Python scraper inserts job listings.
+
+create table scraped_jobs (
+    id uuid primary key default gen_random_uuid(),
+    source text not null,         -- e.g. "Indeed", "LinkedIn"
+    job_title text,
+    company text,
+    location text,
+    url text,
+    description text,
+    requirements jsonb,
+    posted_date date,
+    created_at timestamptz default now()
+);
+
+5. job_matches
+
+AI/algorithm-generated match score for each job → user
+
+create table job_matches (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid references users(id) on delete cascade,
+    job_id uuid references scraped_jobs(id) on delete cascade,
+
+    score numeric,        -- 0–100
+    reasons jsonb,        -- why match? {"skills_match": "...", "experience_match": "..."}
+    matched_at timestamptz default now()
+);
+
+🟧 INTERVIEW PREPARATION
+6. interview_requests
+
+User enters company + role + technologies
+
+create table interview_requests (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid references users(id) on delete cascade,
+    company text,
+    role text,
+    technologies text[],
+    created_at timestamptz default now()
+);
+
+7. interview_research
+
+Stores Python-scraped research + AI research summaries.
+
+create table interview_research (
+    id uuid primary key default gen_random_uuid(),
+    request_id uuid references interview_requests(id) on delete cascade,
+    company_overview text,
+    company_tech_stack jsonb,
+    recent_news jsonb,
+    role_expectations jsonb,
+    created_at timestamptz default now()
+);
+
+8. interview_questions
+
+AI-generated Q&A (technical + behavioral)
+
+create table interview_questions (
+    id uuid primary key default gen_random_uuid(),
+    request_id uuid references interview_requests(id) on delete cascade,
+
+    category text,     -- "technical" | "behavioral" | "company-specific"
+    question text,
+    model_answer text,
+    explanation text,
+
+    created_at timestamptz default now()
+);
+
+🟩 DASHBOARD & ANALYTICS
+9. analytics_skill_gaps
+
+Used to show skill gap analysis.
+
+create table analytics_skill_gaps (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid references users(id) on delete cascade,
+
+    missing_skills text[],
+    recommended_skills text[],
+    gap_explanation text,
+
+    created_at timestamptz default now()
+);
+
+10. user_activity
+
+Tracks job views, applications, and interview prep sessions.
+
+create table user_activity (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid references users(id),
+    action text,                -- "view_job", "apply_job", "generate_interview"
+    metadata jsonb,             -- job_id, request_id, etc.
+    created_at timestamptz default now()
+);
