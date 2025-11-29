@@ -145,3 +145,71 @@ MIT
 ---
 
 Built with ❤️ using Next.js and Supabase
+
+
+
+
+
+project plan 
+
+
+Core Requirements:
+
+Intelligent Resume Analysis
+Accept resume uploads in PDF format
+Extract and structure key information: skills, experience, education, projects
+Build a comprehensive user profile from resume data
+Identify technical expertise areas and proficiency levels
+Store structured resume insights for ongoing use
+
+Automated Job Discovery & Matching
+Scrape job listings based on extracted resume qualifications
+Filter jobs by relevance to user’s specific experience and skill level
+Present curated job matches with scoring, scores explaining why each job fits
+Display key requirements and alignment with user qualifications
+
+Deep Research-Powered Interview Preparation
+Accept user input for upcoming interviews (company name, role, key technologies)
+Automatically gather real-time company and industry information from the specified technologies
+Build interview question bank based on:
+Company-specific technologies and role
+Recent interview experiences shared online
+Company-specific culture and technical focus
+
+Generate behavioral and technical questions with detailed model answers and sample answers (with explanations)
+
+
+Page 3
+
+User Dashboard & Analytics
+Visual overview of job search progress and discovered opportunities
+Skill coverage analysis showing strengths and gaps
+Interview preparation tracker and history
+Clear presentation of AI-generated insights and recommendations
+
+
+Technical Requirements:
+
+Web-based application accessible via browser
+Secure user authentication and data storage
+PDF parsing and text extraction
+Web scraping functionality for job discovery
+Database for persistent storage
+All the code must be stored with GitHub
+All the code must be open-source, clean and documented
+
+Judging Rubrics:
+
+Feature Completeness & Quality
+Resume Analysis: Accuracy of extraction and insight depth (40% – heavily weighted)
+Job Matching: Relevance and quality of discovered opportunities (with clear scoring)
+Interview Prep: Depth of research and usefulness of generated questions (15–20 min)
+Dashboard: Intuitive presentation of insights and actionable information
+AI Integration & Innovation
+Sophisticated use of AI for reasoning and skill extraction
+Quality of job matching and research process (must show evidence of internet research, not generic responses)
+Difficulty, Ambition & Completeness
+Simply re-creating a basic job board or generic question bank will score low
+Bonus points for creative, sophisticated solutions to clearly challenging aspects (e.g., deep company/role-specific research, multi-step AI reasoning, high-quality resume parsing)
+
+Well done on building something this ambitious! Good luck in the hackathon! 🚀
