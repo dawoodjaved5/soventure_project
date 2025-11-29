@@ -1,3 +1,12 @@
+M Dawood Javed 23i-3038
+Muneeb Ur Rehman 23i-0100
+Muhammad Hashir  23i-3047
+Uzair Majeed     23i-3063
+
+
+
+
+
 # Soventure - Next.js + Supabase + Google OAuth
 
 A modern authentication system built with Next.js 14, Supabase, and Google OAuth. Features beautiful UI, secure authentication flows, and both email/password and Google OAuth sign-in methods.
