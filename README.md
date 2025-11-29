@@ -368,3 +368,30 @@ create table user_activity (
     metadata jsonb,             -- job_id, request_id, etc.
     created_at timestamptz default now()
 );
+
+
+
+FLOW
+
+Frontend (React)
+    ↓ upload PDF
+Supabase Storage → stores resume
+    ↓ file URL
+Node.js Backend
+    ↓ extract text (pdf-parse)
+AI → extract skills/experience/projects
+    ↓ structured JSON
+Supabase DB → save resume data
+    ↓ skills JSON passed to scraper
+Python Scraper → scrape based on extracted skills
+    ↓ scraped_jobs
+AI/Node → generate job matching scores
+    ↓ store job_matches
+Frontend dashboard → displays job matches
+
+User enters company + role
+    ↓
+Python Scraper → gather company info
+AI → generate interview questions
+    ↓ store interview_questions
+Dashboard → show interview prep
