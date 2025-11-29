@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/utils/supabase/server'
 import LogoutButton from '@/components/LogoutButton'
+import ResumeUpload from '@/components/ResumeUpload'
 
 export default async function DashboardPage() {
   const supabase = await createServerClient()
@@ -19,7 +20,11 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single()
   
-  const profile = data as { full_name: string | null; avatar_url: string | null } | null
+  const profile = data as { 
+    full_name: string | null
+    avatar_url: string | null
+    resume_url: string | null
+  } | null
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -28,16 +33,27 @@ export default async function DashboardPage() {
           <div className="flex justify-between items-start mb-8">
             <div>
               <h1 className="text-3xl font-extrabold text-gray-900">
-                Welcome to your Dashboard
+                Resume Analysis Dashboard
               </h1>
               <p className="mt-2 text-sm text-gray-600">
-                You're successfully authenticated!
+                Upload your resume to get started with analysis
               </p>
             </div>
             <LogoutButton />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Resume Upload Section - Main Feature */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Upload Your Resume
+            </h2>
+            <ResumeUpload 
+              userId={user.id} 
+              currentResumeUrl={profile?.resume_url}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-6 border border-primary-200">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 User Information
@@ -46,12 +62,6 @@ export default async function DashboardPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-500">Email</p>
                   <p className="text-base text-gray-900">{user.email}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">User ID</p>
-                  <p className="text-base text-gray-900 font-mono text-sm">
-                    {user.id}
-                  </p>
                 </div>
                 {profile?.full_name && (
                   <div>
@@ -78,7 +88,7 @@ export default async function DashboardPage() {
 
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Authentication Status
+                Account Status
               </h2>
               <div className="space-y-3">
                 <div className="flex items-center">
@@ -89,7 +99,7 @@ export default async function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">
-                    Provider
+                    Sign In Method
                   </p>
                   <p className="text-base text-gray-900 capitalize">
                     {user.app_metadata?.provider || 'email'}
@@ -97,10 +107,14 @@ export default async function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">
-                    Email Verified
+                    Resume Status
                   </p>
                   <p className="text-base text-gray-900">
-                    {user.email_confirmed_at ? 'Yes' : 'No'}
+                    {profile?.resume_url ? (
+                      <span className="text-green-600 font-semibold">✓ Uploaded</span>
+                    ) : (
+                      <span className="text-gray-500">Not uploaded</span>
+                    )}
                   </p>
                 </div>
               </div>
